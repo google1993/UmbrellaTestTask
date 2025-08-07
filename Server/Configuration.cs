@@ -1,10 +1,7 @@
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace Server
 {
@@ -20,7 +17,7 @@ namespace Server
         public static Configuration LoadFromJson(string path)
         {
             string json = File.ReadAllText(path);
-            return JsonConvert.DeserializeObject<Configuration>(json)
+            return JsonSerializer.Deserialize<Configuration>(json, SourceGenerationContext.Default.Configuration)
                 ?? throw new Exception("Invalid configuration.");
         }
     }

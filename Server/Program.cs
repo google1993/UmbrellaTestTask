@@ -7,8 +7,6 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 
 namespace Server
 {
@@ -78,13 +76,15 @@ namespace Server
                     {
                         try
                         {
-                            if (ApplyFilters(line, config.Filters))
+                            using JsonDocument doc = JsonDocument.Parse(line);
+                            if (ApplyFilters(doc.RootElement, config.Filters))
                             {
-                                var prettyJson = JToken.Parse(line).ToString(Formatting.Indented);
+                                var options = new JsonSerializerOptions { WriteIndented = true };
+                                string prettyJson = JsonSerializer.Serialize(doc.RootElement, SourceGenerationContext.Default.JsonDocument);
                                 Console.WriteLine(prettyJson);
                             }
                         }
-                        catch (JsonReaderException)
+                        catch (JsonException)
                         {
                             Console.Error.WriteLine($"Invalid JSON: {line}");
                         }
@@ -98,12 +98,22 @@ namespace Server
             }
         }
 
-        private static bool ApplyFilters(string jsonString, List<Filter> filters)
+        private static bool ApplyFilters(JsonElement root, List<Filter> filters)
         {
-            var jsonObject = JObject.Parse(jsonString);
             foreach (var filter in filters)
             {
-                var fieldValue = jsonObject[filter.Field]?.ToString();
+                if (!root.TryGetProperty(filter.Field, out var field))
+                {
+                    return false;
+                }
+
+                string fieldValue = field.ValueKind switch
+                {
+                    JsonValueKind.String => field.GetString() ?? "",
+                    JsonValueKind.Null => "null",
+                    _ => field.ToString()
+                };
+
                 switch (filter.Operator)
                 {
                     case "equals":
@@ -113,10 +123,10 @@ namespace Server
                         if (fieldValue == filter.Value) return false;
                         break;
                     case "contains":
-                        if (fieldValue == null || !fieldValue.Contains(filter.Value)) return false;
+                        if (!fieldValue.Contains(filter.Value)) return false;
                         break;
                     case "not_contains":
-                        if (fieldValue != null && fieldValue.Contains(filter.Value)) return false;
+                        if (fieldValue.Contains(filter.Value)) return false;
                         break;
                     default:
                         throw new InvalidOperationException($"Unknown operator: {filter.Operator}");

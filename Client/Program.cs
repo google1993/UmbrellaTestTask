@@ -1,4 +1,3 @@
-using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Net.Security;
@@ -67,7 +66,7 @@ namespace Client
         {
             try
             {
-                var obj = JToken.Parse(line);
+                JsonDocument.Parse(line);
                 return true;
             }
             catch
