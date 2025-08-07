@@ -1,0 +1,7 @@
+{
+  "InputPath": "/var/data.json",
+  "ServerHost": "localhost",
+  "Server_port": 5555,
+  "TlsEnabled": true,
+  "TlsValidateCert": false
+}

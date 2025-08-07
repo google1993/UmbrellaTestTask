@@ -1,0 +1,7 @@
+{"type": "event","level": "info","message": "Service started"}
+{"type":"event","level":"debug","message":"Debugging something"}
+not a json line
+{"type":"event","level":"error","message":"Something went wrong"}
+{"type":"log","message":"Missing field 'level'}
+1234
+{"type":"event","level":"info","message":"All systems operational"}
