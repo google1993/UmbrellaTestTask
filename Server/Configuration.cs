@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Server
 {
@@ -24,8 +25,11 @@ namespace Server
 
     internal class Filter
     {
+        [JsonPropertyName("field")]
         public string Field { get; set; } = string.Empty;
+        [JsonPropertyName("operator")]
         public string Operator { get; set; } = string.Empty;
+        [JsonPropertyName("value")]
         public string Value { get; set; } = string.Empty;
     }
 }

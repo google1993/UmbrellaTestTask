@@ -1,0 +1,16 @@
+[Unit]
+Description=TCP/TLS Server
+After=syslog.target network.target
+
+[Service]
+WorkingDirectory=/opt/Server
+ExecStart=/opt/Server/Server ./config_server.json
+Restart=always
+RestartSec=10
+Environment=DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+SyslogIdentifier=TCPTLSServer
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

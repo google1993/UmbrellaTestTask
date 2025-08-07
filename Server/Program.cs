@@ -74,23 +74,26 @@ namespace Server
                     string? line;
                     while ((line = await reader.ReadLineAsync()) != null)
                     {
-                        try
-                        {
-                            using JsonDocument doc = JsonDocument.Parse(line);
-                            if (ApplyFilters(doc.RootElement, config.Filters))
-                            {
-                                var options = new JsonSerializerOptions { WriteIndented = true };
-                                string prettyJson = JsonSerializer.Serialize(doc.RootElement, SourceGenerationContext.Default.JsonDocument);
-                                Console.WriteLine(prettyJson);
-                            }
-                        }
-                        catch (JsonException)
+                        if (!IsValidJson(line))
                         {
                             Console.Error.WriteLine($"Invalid JSON: {line}");
+                            continue;
+                        }
+
+                        using JsonDocument doc = JsonDocument.Parse(line);
+                        if (ApplyFilters(doc.RootElement, config.Filters))
+                        {
+                            var options = new JsonSerializerOptions
+                            {
+                                WriteIndented = true,
+                                TypeInfoResolver = SourceGenerationContext.Default
+                            };
+                             //Can't fix. Try: https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/source-generation
+                            string prettyJson = JsonSerializer.Serialize(doc, options);
+                            Console.WriteLine(prettyJson);
                         }
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -133,6 +136,20 @@ namespace Server
                 }
             }
             return true;
+        }
+
+        private static bool IsValidJson(string line)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(line);
+                if (doc.RootElement.ValueKind == JsonValueKind.Object)
+                {
+                    return true;
+                }
+            }
+            catch { }
+            return false;
         }
 
     }

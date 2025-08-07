@@ -32,7 +32,7 @@ namespace Client
         private static async Task RunClient(Configuration config)
         {
             using var client = new TcpClient();
-            await client.ConnectAsync(config.ServerHost, config.Server_port);
+            await client.ConnectAsync(config.ServerHost, config.ServerPort);
 
             Stream stream = client.GetStream();
             if (config.TlsEnabled)
@@ -66,13 +66,14 @@ namespace Client
         {
             try
             {
-                JsonDocument.Parse(line);
-                return true;
+                using var doc = JsonDocument.Parse(line);
+                if (doc.RootElement.ValueKind == JsonValueKind.Object)
+                {
+                    return true;
+                }
             }
-            catch
-            {
-                return false;
-            }
+            catch { }
+            return false;
         }
 
     }

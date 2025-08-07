@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Client
 {
@@ -8,7 +9,8 @@ namespace Client
     {
         public string InputPath { get; set; } = string.Empty;
         public string ServerHost { get; set; } = "localhost";
-        public int Server_port { get; set; } = 5555;
+        [JsonPropertyName("Server_port")]
+        public int ServerPort { get; set; } = 5555;
         public bool TlsEnabled { get; set; } = true;
         public bool TlsValidateCert { get; set; } = false;
 
